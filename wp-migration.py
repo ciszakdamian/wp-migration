@@ -9,6 +9,7 @@ import sys
 import os
 import shutil
 import re
+import fileinput
 from time import sleep
 from ftplib import FTP
 
@@ -46,6 +47,12 @@ def fileSearch(x, name):
 	os.chdir('..')
 	return result
 
+def fileSed(old, new, file):
+	with fileinput.FileInput(file, inplace=True) as file:
+    		for line in file:
+        		print(line.replace(old, new), end='')
+
+
 #check sum argv
 if len(sys.argv) < 6:
 	sys.exit(bcolors.FAIL+"Podaj poprawne parametry w formie:\n"+bcolors.ENDC+"python wp-migration login host password domena(z protokolem) nowa_baza")
@@ -55,7 +62,7 @@ login = sys.argv[1]
 host = sys.argv[2]
 password = sys.argv[3]
 domena = sys.argv[4]
-database = sys.argv[5]
+databaseN = sys.argv[5]
 
 #FTP connect to remote server
 os.system('clear')
@@ -194,13 +201,29 @@ ftp.retrbinary("RETR " + dbFile, open(''+tmpDir+'/'+dbFile+'', 'wb').write)
 #load mysql
 dbFileSql = dbFile[:-3]
 os.chdir(tmpDir)
-print("DB "+dbFileSql+" load to "+database+":")
+print("DB "+dbFileSql+" load to "+databaseN+":")
 os.system("zcat "+dbFile+" >> "+dbFileSql)
-os.system("pv "+dbFileSql+" | mysql "+database)
+os.system("pv "+dbFileSql+" | mysql "+databaseN)
 sleep(2)
-print("DB "+dbName+" migration to "+database+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+print("DB "+dbName+" migration to "+databaseN+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 sleep(3)
 os.system("clear")
+
+#change wp-config.php
+shutil.copyfile(confFile, confFile+".original")
+
+databaseP = "ZMIEN"
+
+sedN = "define( 'DB_NAME', '"+databaseN+"' );"
+sedU = "define( 'DB_USER', '"+databaseN+"' );"
+sedP = "define( 'DB_PASSWORD', '"+databaseP+"' );"
+sedH = "define( 'DB_HOST', 'localhost' );"
+
+fileSed(dbN, sedN, confFile);
+fileSed(dbU, sedU, confFile);
+fileSed(dbP, sedP, confFile);
+fileSed(dbH, sedH, confFile);
+
 ftp.close()
 
 #remove tmp directory
