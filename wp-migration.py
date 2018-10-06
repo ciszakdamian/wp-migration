@@ -77,14 +77,14 @@ ftp.retrlines('LIST')
 #set WP dir
  
 while True:
-	wp_dir = input(bcolors.OKGREEN+"Podaj folder z WP: "+bcolors.ENDC)
+	ftpWpDir = input(bcolors.OKGREEN+"Podaj folder z WP: "+bcolors.ENDC)
 	os.system('clear')
-	ftp.cwd(wp_dir)
+	ftp.cwd(ftpWpDir)
 	ftp.retrlines('LIST')
 	n = input(bcolors.OKGREEN+"Czy podany folder jest poprawny (y/n): "+bcolors.ENDC)
 	if n.strip() == 'y':
 		break
-
+ftpWpPwd = ftp.pwd()
 os.system('clear')
 
 #get out mysql pass
@@ -224,7 +224,16 @@ fileSed(dbU, sedU, confFile);
 fileSed(dbP, sedP, confFile);
 fileSed(dbH, sedH, confFile);
 
+
+#ftp mirror 
+os.chdir('..')
+
+os.system("lftp -e \"set ftp:ssl-allow false; mirror -c '.' '"+domena+"' \" -u \""+login+"\",\""+password+"\" '"+host+"'")
+
+
+
 ftp.close()
 
 #remove tmp directory
+
 #shutil.rmtree(tmpDir)
