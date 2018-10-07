@@ -225,15 +225,23 @@ fileSed(dbP, sedP, confFile);
 fileSed(dbH, sedH, confFile);
 
 
-#ftp mirror 
+#ftp mirror and remove dump script
 os.chdir('..')
 
-os.system("lftp -e \"set ftp:ssl-allow false; mirror -c '.' '"+domena+"' \" -u \""+login+"\",\""+password+"\" '"+host+"'")
+os.system("lftp -e \"set ftp:ssl-allow false; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+domena+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
 
-
+#copy modified wp-config.php
+shutil.copyfile(tmpDir+"/"+confFile, domena+"/"+confFile)
 
 ftp.close()
 
 #remove tmp directory
+shutil.rmtree(tmpDir)
 
-#shutil.rmtree(tmpDir)
+#end
+os.system('clear')
+print("Migration "+domena+" finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+print("Thank you for use this script")
+print("See you again")
+print("Bye")
+
