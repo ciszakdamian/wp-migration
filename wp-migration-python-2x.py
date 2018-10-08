@@ -5,7 +5,7 @@
 #Author: Damian Ciszak
 #Contact: ciszakdamian@gmail.com
 
-#defines
+#lib
 import sys
 import os
 import shutil
@@ -49,7 +49,7 @@ def fileSearch(x, name):
 
 def fileSed(old, new, file):
     for line in fileinput.input(file, inplace=True):
-        print line.replace(old, new),
+            print line.replace(old, new),
 
 #check sum argv
 if len(sys.argv) < 7:
@@ -211,21 +211,21 @@ os.system("clear")
 #change wp-config.php
 shutil.copyfile(confFile, confFile+".original")
 
-#sedN = "define( 'DB_NAME', '"+databaseN+"' );"
-#sedU = "define( 'DB_USER', '"+databaseN+"' );"
-#sedP = "define( 'DB_PASSWORD', '"+databaseP+"' );"
-#sedH = "define( 'DB_HOST', 'localhost' );"
+sedN = "define( 'DB_NAME', '"+databaseN+"' );"
+sedU = "define( 'DB_USER', '"+databaseN+"' );"
+sedP = "define( 'DB_PASSWORD', '"+databaseP+"' );"
+sedH = "define( 'DB_HOST', 'localhost' );"
 
-#fileSed(dbN, sedN, confFile);
-#fileSed(dbU, sedU, confFile);
-#fileSed(dbP, sedP, confFile);
-#fileSed(dbH, sedH, confFile);
+fileSed(dbN, sedN, confFile);
+fileSed(dbU, sedU, confFile);
+fileSed(dbP, sedP, confFile);
+fileSed(dbH, sedH, confFile);
 
 
 #ftp mirror and remove dump script
 os.chdir('..')
 
-os.system("lftp -e \"set ftp:ssl-allow false; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+domena+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
+os.system("lftp -e \"set ftp:ssl-allow false; cd '"+ftpWpPwd+"'; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+domena+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
 
 #copy modified wp-config.php
 shutil.copyfile(tmpDir+"/"+confFile, domena+"/"+confFile)
