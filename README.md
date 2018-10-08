@@ -1,4 +1,5 @@
 # wp-migration
-Python script to auto migration WordPress. 
-The script download files and database and update new pass in wp-config.php. 
-Script use ftplib, lftp, curl, mysql
+Python script to auto migrate WordPress. 
+The script downloads files and database and updates new pass in wp-config.php. 
+Script uses ftplib, lftp, curl, mysql
+
