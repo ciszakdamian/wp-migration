@@ -13,6 +13,8 @@ import re
 import fileinput
 from time import sleep
 from ftplib import FTP
+from random import randint
+
 
 #define colors
 class bcolors:
@@ -26,17 +28,11 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 #create tmp directory
-tmpDir = 'tmp-wp-migration'
+tmpDir = 'tmp-wp-migration-'+str(randint(0, 100000))
 os.mkdir(tmpDir)
 
-#functions 
-#def ftpConnect(login, host, password):
-#       os.system('clear')
-#       print(bcolors.WARNING+"Please wait connecting to "+host+""+bcolors.ENDC)
-#       ftp = FTP(host)
-#       return ftp.login(user=login, passwd=password)
-#       os.system('clear')
 
+#functions 
 def fileSearch(x, name):
         os.chdir(tmpDir)
         file = open(name, "r")
@@ -51,17 +47,13 @@ def fileSed(old, new, file):
     for line in fileinput.input(file, inplace=True):
             print line.replace(old, new),
 
-#check sum argv
-if len(sys.argv) < 7:
-        sys.exit(bcolors.FAIL+"Podaj poprawne parametry w formie:\n"+bcolors.ENDC+"python wp-migration login host password domena(z protokolem) nowa_baza haslo do bazy")
-
-#argv
-login = sys.argv[1]
-host = sys.argv[2]
-password = sys.argv[3]
-domena = sys.argv[4]
-databaseN = sys.argv[5]
-databaseP = sys.argv[6]
+#input variables
+login = raw_input("Podaj login FTP:")
+password = raw_input("Podaj haslo FTP:")
+host = raw_input("Podaj host FTP:")
+domena = raw_input("Podaj nazwe domeny:")
+databaseN = raw_input("Podaj nowa nazwe bazy:")
+databaseP = raw_input("Podaj haslo do nowej bazy:")
 
 #FTP connect to remote server
 os.system('clear')
@@ -74,7 +66,6 @@ os.system('clear')
 ftp.retrlines('LIST')
 
 #set WP dir
- 
 while True:
         ftpWpDir = raw_input(bcolors.OKGREEN+"Podaj folder z WP: "+bcolors.ENDC)
         os.system('clear')
@@ -238,7 +229,5 @@ shutil.rmtree(tmpDir)
 #end
 os.system('clear')
 print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
-print("Thank you for use this script")
-print("See you again")
-print("Bye")
+print("See you again :)")
 
