@@ -5,5 +5,5 @@ Script use ftplib, lftp, curl, mysql
 # Warning
 Wp-migration-python-2x.py is only working at the moment with Python 2.x 
 </br>
-Version for Python 3.x will be work in future. 
+Version for Python 3.x (wp-migration.py) will be able in future. 
 
