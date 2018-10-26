@@ -2,6 +2,7 @@
 #wp-migration.py
 #Script to auto migration WordPress
 #Compatible with Python 2.x
+#Log /var/log/wp-migation/
 #Author: Damian Ciszak
 #Contact: ciszakdamian@gmail.com
 
@@ -11,10 +12,11 @@ import os
 import shutil
 import re
 import fileinput
+import datetime
+import socket
 from time import sleep
 from ftplib import FTP
 from random import randint
-
 
 #define colors
 class bcolors:
@@ -31,7 +33,6 @@ class bcolors:
 tmpDir = 'tmp-wp-migration-'+str(randint(0, 100000))
 os.mkdir(tmpDir)
 
-
 #functions 
 def fileSearch(x, name):
         os.chdir(tmpDir)
@@ -47,11 +48,17 @@ def fileSed(old, new, file):
     for line in fileinput.input(file, inplace=True):
             print line.replace(old, new),
 
+def logWrite(text):
+    file = open('/var/log/wp-migration/main.log', 'a')
+    file.write(text)
+    file.close()
+
 #input variables
 login = raw_input("Podaj login FTP:")
 password = raw_input("Podaj haslo FTP:")
 host = raw_input("Podaj host FTP:")
-domena = raw_input("Podaj nazwe domeny:")
+domena = raw_input("Podaj nazwe domeny z protokolem:")
+siteDir = raw_input("Podaj nazwe folderu docelowego:")
 databaseN = raw_input("Podaj nowa nazwe bazy:")
 databaseP = raw_input("Podaj haslo do nowej bazy:")
 
@@ -114,7 +121,6 @@ while True:
         n = raw_input(bcolors.OKGREEN+"Czy dane sa poprawne? (y/n): "+bcolors.ENDC)
         if n.strip() == 'y':
                 break
-
 x = 0
 while True:
         if x != 0:
@@ -187,6 +193,7 @@ os.system("curl "+request)
 
 #download database 
 ftp.retrbinary("RETR " + dbFile, open(''+tmpDir+'/'+dbFile+'', 'wb').write)
+ftp.close()
 
 #load mysql
 dbFileSql = dbFile[:-3]
@@ -212,21 +219,32 @@ fileSed(dbU, sedU, confFile);
 fileSed(dbP, sedP, confFile);
 fileSed(dbH, sedH, confFile);
 
-
 #ftp mirror and remove dump script
 os.chdir('..')
-
-os.system("lftp -e \"set ftp:ssl-allow false; cd '"+ftpWpPwd+"'; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+domena+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
+os.system("lftp -e \"set ftp:ssl-allow false; cd '"+ftpWpPwd+"'; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+siteDir+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
 
 #copy modified wp-config.php
-shutil.copyfile(tmpDir+"/"+confFile, domena+"/"+confFile)
+shutil.copyfile(tmpDir+"/"+confFile, siteDir+"/"+confFile)
 
-ftp.close()
+#log create 
+if not os.path.exists('/var/log/wp-migration'):
+    os.makedirs('/var/log/wp-migration')
 
-#remove tmp directory
-shutil.rmtree(tmpDir)
+now = datetime.datetime.now()
+date = now.strftime("%Y-%m-%d %H:%M")
+
+sourceIP = socket.gethostbyname(host)
+
+logWrite("["+date+"] "+domena+"\n")
+logWrite("Source IP: "+sourceIP+"\n")
+logWrite("DB Name: "+dbName+"\n")
+logWrite("DB User: "+dbUser+"\n")
+logWrite("DB Pass: "+dbPassword+"\n")
+logWrite("DB Host: "+dbHost+"\n")
+logWrite("\n")
 
 #end
+shutil.rmtree(tmpDir)
 os.system('clear')
 print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 print("See you again :)")
