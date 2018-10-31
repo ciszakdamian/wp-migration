@@ -243,9 +243,20 @@ logWrite("DB Pass: "+dbPassword+"\n")
 logWrite("DB Host: "+dbHost+"\n")
 logWrite("\n")
 
+#set correct chmod permissions
+os.system('clear')
+os.chdir(siteDir)
+
+os.system("find * -type d -exec chmod 0755 {} \;")
+print("Set chmod 755 for directories in site dir "+siteDir+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+
+os.system("find * -type f -exec chmod 0644 {} \;")
+print("Set chmod 644 for files in site dir "+siteDir+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+
+os.chdir('..')
+
 #end
 shutil.rmtree(tmpDir)
-os.system('clear')
 print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 print("See you again :)")
 
