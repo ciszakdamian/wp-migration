@@ -2,6 +2,7 @@
 #wp-migration.py
 #Script to auto migration WordPress
 #Compatible with Python 2.x
+#Log /var/log/wp-migation/
 #Author: Damian Ciszak
 #Contact: ciszakdamian@gmail.com
 
@@ -11,8 +12,11 @@ import os
 import shutil
 import re
 import fileinput
+import datetime
+import socket
 from time import sleep
 from ftplib import FTP
+from random import randint
 
 #define colors
 class bcolors:
@@ -26,17 +30,10 @@ class bcolors:
     UNDERLINE = '\033[4m'
 
 #create tmp directory
-tmpDir = 'tmp-wp-migration'
+tmpDir = 'tmp-wp-migration-'+str(randint(0, 100000))
 os.mkdir(tmpDir)
 
 #functions 
-#def ftpConnect(login, host, password):
-#       os.system('clear')
-#       print(bcolors.WARNING+"Please wait connecting to "+host+""+bcolors.ENDC)
-#       ftp = FTP(host)
-#       return ftp.login(user=login, passwd=password)
-#       os.system('clear')
-
 def fileSearch(x, name):
         os.chdir(tmpDir)
         file = open(name, "r")
@@ -51,17 +48,19 @@ def fileSed(old, new, file):
     for line in fileinput.input(file, inplace=True):
             print line.replace(old, new),
 
-#check sum argv
-if len(sys.argv) < 7:
-        sys.exit(bcolors.FAIL+"Podaj poprawne parametry w formie:\n"+bcolors.ENDC+"python wp-migration login host password domena(z protokolem) nowa_baza haslo do bazy")
+def logWrite(text):
+    file = open('/var/log/wp-migration/main.log', 'a')
+    file.write(text)
+    file.close()
 
-#argv
-login = sys.argv[1]
-host = sys.argv[2]
-password = sys.argv[3]
-domena = sys.argv[4]
-databaseN = sys.argv[5]
-databaseP = sys.argv[6]
+#input variables
+login = raw_input("Podaj login FTP:")
+password = raw_input("Podaj haslo FTP:")
+host = raw_input("Podaj host FTP:")
+domena = raw_input("Podaj nazwe domeny z protokolem:")
+siteDir = raw_input("Podaj nazwe folderu docelowego:")
+databaseN = raw_input("Podaj nowa nazwe bazy:")
+databaseP = raw_input("Podaj haslo do nowej bazy:")
 
 #FTP connect to remote server
 os.system('clear')
@@ -74,7 +73,6 @@ os.system('clear')
 ftp.retrlines('LIST')
 
 #set WP dir
- 
 while True:
         ftpWpDir = raw_input(bcolors.OKGREEN+"Podaj folder z WP: "+bcolors.ENDC)
         os.system('clear')
@@ -123,7 +121,6 @@ while True:
         n = raw_input(bcolors.OKGREEN+"Czy dane sa poprawne? (y/n): "+bcolors.ENDC)
         if n.strip() == 'y':
                 break
-
 x = 0
 while True:
         if x != 0:
@@ -196,6 +193,7 @@ os.system("curl "+request)
 
 #download database 
 ftp.retrbinary("RETR " + dbFile, open(''+tmpDir+'/'+dbFile+'', 'wb').write)
+ftp.close()
 
 #load mysql
 dbFileSql = dbFile[:-3]
@@ -221,24 +219,44 @@ fileSed(dbU, sedU, confFile);
 fileSed(dbP, sedP, confFile);
 fileSed(dbH, sedH, confFile);
 
-
 #ftp mirror and remove dump script
 os.chdir('..')
-
-os.system("lftp -e \"set ftp:ssl-allow false; cd '"+ftpWpPwd+"'; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+domena+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
+os.system("lftp -e \"set ftp:ssl-allow false; cd '"+ftpWpPwd+"'; rm -r '"+tmpDirRemote+"'; mirror -c '.' '"+siteDir+"'; exit \" -u \""+login+"\",\""+password+"\" '"+host+"'")
 
 #copy modified wp-config.php
-shutil.copyfile(tmpDir+"/"+confFile, domena+"/"+confFile)
+shutil.copyfile(tmpDir+"/"+confFile, siteDir+"/"+confFile)
 
-ftp.close()
+#log create 
+if not os.path.exists('/var/log/wp-migration'):
+    os.makedirs('/var/log/wp-migration')
 
-#remove tmp directory
-shutil.rmtree(tmpDir)
+now = datetime.datetime.now()
+date = now.strftime("%Y-%m-%d %H:%M")
+
+sourceIP = socket.gethostbyname(host)
+
+logWrite("["+date+"] "+domena+"\n")
+logWrite("Source IP: "+sourceIP+"\n")
+logWrite("DB Name: "+dbName+"\n")
+logWrite("DB User: "+dbUser+"\n")
+logWrite("DB Pass: "+dbPassword+"\n")
+logWrite("DB Host: "+dbHost+"\n")
+logWrite("\n")
+
+#set correct chmod permissions
+os.system('clear')
+os.chdir(siteDir)
+
+os.system("find * -type d -exec chmod 0755 {} \;")
+print("Set chmod 755 for directories in site dir "+siteDir+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+
+os.system("find * -type f -exec chmod 0644 {} \;")
+print("Set chmod 644 for files in site dir "+siteDir+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+
+os.chdir('..')
 
 #end
-os.system('clear')
+shutil.rmtree(tmpDir)
 print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
-print("Thank you for use this script")
-print("See you again")
-print("Bye")
+print("See you again :)")
 
