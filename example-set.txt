@@ -1,0 +1,8 @@
+#If you want wp-migration can read data from file create set.txt before run
+ftp_login
+ftp_pass
+ftp_host
+http://example.com
+site_dir
+db_name
+db_pass

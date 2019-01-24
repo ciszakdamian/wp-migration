@@ -37,10 +37,10 @@ os.mkdir(tmpDir)
 class InputData:
     def file(self):
         conf = []
-
         with open('set.txt') as f:
             conf = f.read().splitlines()
-
+        
+	global login, password, host, domain, siteDir, databaseN, databaseP
         login = conf[0]
         password = conf[1]
         host = conf[2]
@@ -50,6 +50,7 @@ class InputData:
         databaseP = conf[6]
 
     def key(self):
+	global login, password, host, domain, siteDir, databaseN, databaseP
         login = raw_input("Podaj login FTP:")
         password = raw_input("Podaj haslo FTP:")
         host = raw_input("Podaj host FTP:")
@@ -79,12 +80,16 @@ def logWrite(text):
 
 #input variables
 dataOption = True
-while True:
-    n = raw_input(bcolors.OKGREEN+"Czy chcesz wczytac dane z pliku set.txt? (y/n): "+bcolors.ENDC)
-    if n.strip() == 'n':
-        dataOption = False 
-    if n.strip() == 'y' or n.strip() == 'n':
-        break
+
+#manual select exists
+#while True:
+#    n = raw_input(bcolors.OKGREEN+"Czy chcesz wczytac dane z pliku set.txt? (y/n): "+bcolors.ENDC)
+#    if n.strip() == 'n':
+#        dataOption = False 
+#    if n.strip() == 'y' or n.strip() == 'n':
+#        break
+#auto
+dataOption = os.path.isfile('set.txt')
 
 input = InputData()
 
