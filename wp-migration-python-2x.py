@@ -4,7 +4,7 @@
 #Compatible with Python 2.x
 #Log /var/log/wp-migation/
 #Author: Damian Ciszak
-#Contact: ciszakdamian@gmail.com
+#Contact: ciszakdamian(at)gmail.com
 
 #lib
 import sys
@@ -34,6 +34,30 @@ tmpDir = 'tmp-wp-migration-'+str(randint(0, 100000))
 os.mkdir(tmpDir)
 
 #functions 
+class InputData:
+    def file(self):
+        conf = []
+
+        with open('set.txt') as f:
+            conf = f.read().splitlines()
+
+        login = conf[0]
+        password = conf[1]
+        host = conf[2]
+        domain = conf[3]
+        siteDir = conf[4]
+        databaseN = conf[5]
+        databaseP = conf[6]
+
+    def key(self):
+        login = raw_input("Podaj login FTP:")
+        password = raw_input("Podaj haslo FTP:")
+        host = raw_input("Podaj host FTP:")
+        domain = raw_input("Podaj nazwe domeny z protokolem:")
+        siteDir = raw_input("Podaj nazwe folderu docelowego:")
+        databaseN = raw_input("Podaj nowa nazwe bazy:")
+        databaseP = raw_input("Podaj haslo do nowej bazy:")
+
 def fileSearch(x, name):
         os.chdir(tmpDir)
         file = open(name, "r")
@@ -54,13 +78,20 @@ def logWrite(text):
     file.close()
 
 #input variables
-login = raw_input("Podaj login FTP:")
-password = raw_input("Podaj haslo FTP:")
-host = raw_input("Podaj host FTP:")
-domena = raw_input("Podaj nazwe domeny z protokolem:")
-siteDir = raw_input("Podaj nazwe folderu docelowego:")
-databaseN = raw_input("Podaj nowa nazwe bazy:")
-databaseP = raw_input("Podaj haslo do nowej bazy:")
+dataOption = True
+while True:
+    n = raw_input(bcolors.OKGREEN+"Czy chcesz wczytac dane z pliku set.txt? (y/n): "+bcolors.ENDC)
+    if n.strip() == 'n':
+        dataOption = False 
+    if n.strip() == 'y' or n.strip() == 'n':
+        break
+
+input = InputData()
+
+if dataOption == True:
+    input.file()
+else:
+    input.key()
 
 #FTP connect to remote server
 os.system('clear')
@@ -78,7 +109,7 @@ while True:
         os.system('clear')
         ftp.cwd(ftpWpDir)
         ftp.retrlines('LIST')
-        n = raw_input(bcolors.OKGREEN+"Czy podany folder jest poprawny (y/n): "+bcolors.ENDC)
+        n = raw_input(bcolors.OKGREEN+"Czy podany folder jest poprawny? (y/n): "+bcolors.ENDC)
         if n.strip() == 'y':
                 break
 ftpWpPwd = ftp.pwd()
@@ -187,7 +218,7 @@ os.chdir('..')
 print("Script "+dbScript+" upload to "+tmpDirRemote+": "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 
 #curl run dump script
-request = domena+"/"+tmpDirRemote+"/"+dbScript
+request = domain+"/"+tmpDirRemote+"/"+dbScript
 print("DB file size:")
 os.system("curl "+request)
 
@@ -235,7 +266,7 @@ date = now.strftime("%Y-%m-%d %H:%M")
 
 sourceIP = socket.gethostbyname(host)
 
-logWrite("["+date+"] "+domena+"\n")
+logWrite("["+date+"] "+domain+"\n")
 logWrite("Source IP: "+sourceIP+"\n")
 logWrite("DB Name: "+dbName+"\n")
 logWrite("DB User: "+dbUser+"\n")
@@ -257,6 +288,6 @@ os.chdir('..')
 
 #end
 shutil.rmtree(tmpDir)
-print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+print("Migration "+domain+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 print("See you again :)")
 

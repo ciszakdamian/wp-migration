@@ -240,7 +240,7 @@ shutil.rmtree(tmpDir)
 
 #end
 os.system('clear')
-print("Migration "+domena+" finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
+print("Migration "+domena+" is finish: "+bcolors.OKGREEN+"successfull"+bcolors.ENDC)
 print("Thank you for use this script")
 print("See you again")
 print("Bye")
