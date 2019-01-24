@@ -2,7 +2,10 @@
 #wp-migration
 #Script to auto migration wp
 #Author: Damian Ciszak
-#Contact: ciszakdamian@gmail.com
+#Contact: ciszakdamian(at)gmail.com
+
+#This code for Python version 3x is not complete at the moment.
+#You can use wp-migration-python-2x.py with Python 2x
 
 #defines
 import sys
